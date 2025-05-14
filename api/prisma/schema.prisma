@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Roles {
+  USER
+  ADMIN
+  PROFESSIONAL
+}
+
+model User {
+  id             String   @id @default(cuid())
+  name           String
+  email          String   @unique
+  password       String
+  phone          String?
+  address        String?
+  isProfessional Boolean  @default(false)
+  role           Roles    @default(USER)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  profile           Profile?
+  schedulesAsClient Scheduling[] @relation("ClientSchedules")
+}
+
+model Profile {
+  userId String  @id
+  bio    String?
+
+  categoryId       String?
+  daysOfWeekWorked String[]
+  typeOfService    String[]
+  startTime        DateTime?
+  endTime          DateTime?
+  serviceDuration  Int
+  isActive         Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  category                Category?    @relation(fields: [categoryId], references: [id])
+  user                    User         @relation(fields: [userId], references: [id])
+  schedulesAsProfessional Scheduling[] @relation("ProfessionalSchedules")
+
+  TimeSlot TimeSlot[]
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profiles Profile[]
+}
+
+model Scheduling {
+  id             String   @id @default(cuid())
+  clientId       String
+  professionalId String
+  dateHour       DateTime
+  status         String   @default("PENDING")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client       User    @relation("ClientSchedules", fields: [clientId], references: [id])
+  professional Profile @relation("ProfessionalSchedules", fields: [professionalId], references: [userId])
+}
+
+model TimeSlot {
+  id        String   @id @default(cuid())
+  profileId String
+  dateTime  DateTime
+  isBooked  Boolean  @default(false)
+  isBlocked Boolean  @default(false)
+  note      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [userId])
+
+  @@unique([profileId, dateTime])
+}

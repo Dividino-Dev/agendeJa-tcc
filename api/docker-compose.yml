@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  api:
+    build: . 
+    image: agendeja-api
+    container_name: agendeja-dev-api
+    ports:
+      - 3000:4000
+    environment:
+      - NODE_ENV=developer
+      - DATABASE_URL=postgresql://admin:admin@agendeja-dev-databasex:5432/agendeja-dev-db?schema=public
+      - JWT_SECRET=secret
+      - FRONTEND_URL=http://localhost:4001
+    networks:
+      - agendeja-dev
+    depends_on:
+      - mmap-database
+
+
+  mmap-database:
+    image: postgres:16.2-alpine3.19
+    container_name: agendeja-dev-databasex
+    ports:
+      - 7432:5432
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=agendeja-dev-db
+    volumes:
+      - vl-tcc-agendeja-dev-db:/var/lib/postgresql/data
+    networks:
+      - agendeja-dev
+
+networks:
+  agendeja-dev:
+    driver: bridge
+
+volumes:
+  vl-tcc-agendeja-dev-db:

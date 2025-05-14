@@ -1,0 +1,21 @@
+services:
+  mmap-database:
+    image: postgres:16.2-alpine3.19
+    container_name: agendeja-dev-database
+    ports:
+      - 6432:5432
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=agendeja-dev-db
+    volumes:
+      - 'vl-tcc-agendeja-dev-db:/var/lib/postgresql/data'
+    networks:
+      - agendeja-dev
+
+networks:
+  agendeja-dev:
+    driver: bridge
+
+volumes:
+  vl-tcc-agendeja-dev-db:
